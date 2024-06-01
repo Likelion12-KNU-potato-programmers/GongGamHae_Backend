@@ -4,9 +4,12 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.likelion12_team_project.dto.request.UserNicknameUpdateRequest;
 import com.likelion12_team_project.dto.request.UserProfileUpdateRequest;
-import com.likelion12_team_project.dto.response.UserCommentedPostResponse;
-import com.likelion12_team_project.dto.response.UserPostResponse;
+import com.likelion12_team_project.dto.response.GonggamCommentResponse;
+import com.likelion12_team_project.dto.response.GonggamPostResponse;
+import com.likelion12_team_project.dto.response.JayuCommentResponse;
+import com.likelion12_team_project.dto.response.JayuPostResponse;
 import com.likelion12_team_project.dto.response.UserInfoResponse;
+import com.likelion12_team_project.dto.response.UserPostResponse;
 import com.likelion12_team_project.entity.GonggamPost;
 import com.likelion12_team_project.entity.JayuPost;
 import com.likelion12_team_project.entity.User;
@@ -17,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -73,35 +77,42 @@ public class UserService {
 
     public List<UserPostResponse> getUserPosts(Long userId) {
         List<UserPostResponse> jayuPosts = jayuPostRepository.findByUserId(userId).stream()
-                .map(this::convertToUserPostResponse)
+                .map(this::returnTheJayuPost)
                 .collect(Collectors.toList());
 
         List<UserPostResponse> gonggamPosts = gonggamPostRepository.findByUserId(userId).stream()
-                .map(this::convertToUserPostResponse)
+                .map(this::returnTheGonggamPost)
                 .collect(Collectors.toList());
 
-        jayuPosts.addAll(gonggamPosts);
-        return jayuPosts;
+        List<UserPostResponse> userPosts = new ArrayList<>();
+        userPosts.addAll(jayuPosts);
+        userPosts.addAll(gonggamPosts);
+
+        // 중복 제거
+        Map<Long, UserPostResponse> uniquePosts = userPosts.stream()
+                .collect(Collectors.toMap(UserPostResponse::getId, Function.identity(), (existing, replacement) -> existing));
+
+        return new ArrayList<>(uniquePosts.values());
     }
 
-    public List<UserCommentedPostResponse> getUserCommentedPosts(Long userId) {
-        List<UserCommentedPostResponse> jayuCommentedPosts = jayuCommentRepository.findByUserId(userId).stream()
-                .map(comment -> convertToUserCommentedPostResponse(comment.getPost()))
+    public List<UserPostResponse> getUserCommentedPosts(Long userId) {
+        List<UserPostResponse> jayuCommentedPosts = jayuCommentRepository.findByUserId(userId).stream()
+                .map(comment -> returnTheJayuPost(comment.getPost()))
                 .collect(Collectors.toList());
 
-        List<UserCommentedPostResponse> gonggamCommentedPosts = gonggamCommentRepository.findByUserId(userId).stream()
-                .map(comment -> convertToUserCommentedPostResponse(comment.getPost()))
+        List<UserPostResponse> gonggamCommentedPosts = gonggamCommentRepository.findByUserId(userId).stream()
+                .map(comment -> returnTheGonggamPost(comment.getPost()))
                 .collect(Collectors.toList());
 
-        // postId를 기준으로 목록을 결합
-        List<UserCommentedPostResponse> commentedPosts = jayuCommentedPosts;
+        List<UserPostResponse> commentedPosts = new ArrayList<>();
+        commentedPosts.addAll(jayuCommentedPosts);
         commentedPosts.addAll(gonggamCommentedPosts);
 
         // postId로 중복 제거
-        Map<Long, UserCommentedPostResponse> uniquePosts = commentedPosts.stream()
-                .collect(Collectors.toMap(UserCommentedPostResponse::getId, Function.identity(), (existing, replacement) -> existing));
+        Map<Long, UserPostResponse> uniquePosts = commentedPosts.stream()
+                .collect(Collectors.toMap(UserPostResponse::getId, Function.identity(), (existing, replacement) -> existing));
 
-        return uniquePosts.values().stream().collect(Collectors.toList());
+        return new ArrayList<>(uniquePosts.values());
     }
 
     public UserInfoResponse getUserInfo(Long userId) {
@@ -110,20 +121,26 @@ public class UserService {
         return new UserInfoResponse(user.getId(), user.getUserAccount(), user.getNickname(), user.getProfileImageUrl());
     }
 
-    private UserPostResponse convertToUserPostResponse(JayuPost post) {
-        return new UserPostResponse(post.getId(), post.getTitle(), post.getContent(), post.getImageUrl(), post.getCreatedAt());
+    private JayuPostResponse returnTheJayuPost(JayuPost post) {
+    	User user = post.getUser();
+    	UserInfoResponse userInfo = new UserInfoResponse(user.getId(), user.getUserAccount(), user.getNickname(), user.getProfileImageUrl());
+
+    	List<JayuCommentResponse> commentResponses = post.getComments().stream()
+                .map(comment -> new JayuCommentResponse(comment.getId(), comment.getContent(), comment.getCreatedAt(), userInfo))
+                .collect(Collectors.toList());
+        return new JayuPostResponse(post.getId(), post.getTitle(), post.getContent(), post.getImageUrl(), post.getCreatedAt(), userInfo, 
+                                    post.getCommentCount(), commentResponses);
     }
 
-    private UserPostResponse convertToUserPostResponse(GonggamPost post) {
-        return new UserPostResponse(post.getId(), post.getTitle(), post.getContent(), post.getImageUrl(), post.getCreatedAt());
-    }
-
-    private UserCommentedPostResponse convertToUserCommentedPostResponse(JayuPost post) {
-        return new UserCommentedPostResponse(post.getId(), post.getTitle(), post.getContent(), post.getImageUrl(), post.getCreatedAt());
-    }
-
-    private UserCommentedPostResponse convertToUserCommentedPostResponse(GonggamPost post) {
-        return new UserCommentedPostResponse(post.getId(), post.getTitle(), post.getContent(), post.getImageUrl(), post.getCreatedAt());
+    private GonggamPostResponse returnTheGonggamPost(GonggamPost post) {
+    	User user = post.getUser();
+    	UserInfoResponse userInfo = new UserInfoResponse(user.getId(), user.getUserAccount(), user.getNickname(), user.getProfileImageUrl());
+    	
+    	List<GonggamCommentResponse> commentResponses = post.getComments().stream()
+                .map(comment -> new GonggamCommentResponse(comment.getId(), comment.getContent(), comment.getCreatedAt(), userInfo))
+                .collect(Collectors.toList());
+        return new GonggamPostResponse(post.getId(), post.getTitle(), post.getContent(), post.getImageUrl(), post.getCreatedAt(), userInfo, 
+                                       post.getCommentCount(), commentResponses, post.getLikes(), post.getDislikes());
     }
 
     private String uploadFile(MultipartFile file) throws IOException {
