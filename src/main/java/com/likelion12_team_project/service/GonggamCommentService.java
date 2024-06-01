@@ -2,7 +2,7 @@ package com.likelion12_team_project.service;
 
 import com.likelion12_team_project.dto.request.GonggamCommentRequest;
 import com.likelion12_team_project.dto.response.GonggamCommentResponse;
-import com.likelion12_team_project.dto.response.UserInfoResponse;
+import com.likelion12_team_project.dto.response.UserResponse;
 import com.likelion12_team_project.entity.GonggamComment;
 import com.likelion12_team_project.entity.GonggamPost;
 import com.likelion12_team_project.entity.User;
@@ -75,7 +75,7 @@ public class GonggamCommentService {
                 comment.getId(),
                 comment.getContent(),
                 comment.getCreatedAt(),
-                new UserInfoResponse(comment.getUser().getId(), comment.getUser().getUserAccount(), comment.getUser().getNickname(), comment.getUser().getProfileImageUrl())
+                new UserResponse(comment.getUser().getId(), comment.getUser().getUserid(), comment.getUser().getNickname(), comment.getUser().getProfileImageUrl())
         );
     }
 }

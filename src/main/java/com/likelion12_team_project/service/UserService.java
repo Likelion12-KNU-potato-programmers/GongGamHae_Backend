@@ -6,7 +6,7 @@ import com.likelion12_team_project.dto.request.UserNicknameUpdateRequest;
 import com.likelion12_team_project.dto.request.UserProfileUpdateRequest;
 import com.likelion12_team_project.dto.response.UserCommentedPostResponse;
 import com.likelion12_team_project.dto.response.UserPostResponse;
-import com.likelion12_team_project.dto.response.UserInfoResponse;
+import com.likelion12_team_project.dto.response.UserResponse;
 import com.likelion12_team_project.entity.GonggamPost;
 import com.likelion12_team_project.entity.JayuPost;
 import com.likelion12_team_project.entity.User;
@@ -49,6 +49,10 @@ public class UserService {
 
     @Value("${cloud.aws.region.static}")
     private String region;
+
+    public User findByUserid(String userid) {
+        return userRepository.findByUserid(userid);
+    }
 
     public void updateNickname(Long userId, UserNicknameUpdateRequest nicknameRequest) {
         User user = userRepository.findById(userId)
@@ -104,10 +108,10 @@ public class UserService {
         return uniquePosts.values().stream().collect(Collectors.toList());
     }
 
-    public UserInfoResponse getUserInfo(Long userId) {
+    public UserResponse getUserInfo(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
-        return new UserInfoResponse(user.getId(), user.getUserAccount(), user.getNickname(), user.getProfileImageUrl());
+        return new UserResponse(user.getId(), user.getUserid(), user.getNickname(), user.getProfileImageUrl());
     }
 
     private UserPostResponse convertToUserPostResponse(JayuPost post) {

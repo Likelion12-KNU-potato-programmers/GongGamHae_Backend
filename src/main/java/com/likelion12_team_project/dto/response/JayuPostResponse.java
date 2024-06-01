@@ -19,7 +19,7 @@ public class JayuPostResponse {
     private String content;
     private String imageUrl;
     private LocalDateTime createdAt;
-    private UserInfoResponse userInfo;
+    private UserResponse userInfo;
     private int commentCount;
     private List<JayuCommentResponse> comments; // 댓글 목록 추가
 }
