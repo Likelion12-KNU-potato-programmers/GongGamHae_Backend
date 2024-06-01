@@ -2,9 +2,8 @@ package com.likelion12_team_project.controller;
 
 import com.likelion12_team_project.dto.request.UserNicknameUpdateRequest;
 import com.likelion12_team_project.dto.request.UserProfileUpdateRequest;
-import com.likelion12_team_project.dto.response.UserCommentedPostResponse;
-import com.likelion12_team_project.dto.response.UserPostResponse;
 import com.likelion12_team_project.dto.response.UserInfoResponse;
+import com.likelion12_team_project.dto.response.UserPostResponse;
 import com.likelion12_team_project.entity.User;
 import com.likelion12_team_project.service.UserService;
 import com.likelion12_team_project.util.SessionUtils;
@@ -30,27 +29,25 @@ public class UserController {
 
     @GetMapping("/me/posts")
     public ResponseEntity<List<UserPostResponse>> getCurrentUserPosts(HttpServletRequest request) {
+        ResponseEntity<User> userResponse = SessionUtils.getCurrentUser(request);
+        if (userResponse.getStatusCode() != HttpStatus.OK) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        User user = userResponse.getBody();
 
-    	ResponseEntity<User> userResponse = SessionUtils.getCurrentUser(request);
-    	if (userResponse.getStatusCode() != HttpStatus.OK) {
-    	    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    	}
-    	User user = userResponse.getBody();
-    	
         List<UserPostResponse> userPosts = userService.getUserPosts(user.getId());
         return ResponseEntity.ok(userPosts);
     }
 
     @GetMapping("/me/commented-posts")
-    public ResponseEntity<List<UserCommentedPostResponse>> getCurrentUserCommentedPosts(HttpServletRequest request) {
+    public ResponseEntity<List<UserPostResponse>> getCurrentUserCommentedPosts(HttpServletRequest request) {
+        ResponseEntity<User> userResponse = SessionUtils.getCurrentUser(request);
+        if (userResponse.getStatusCode() != HttpStatus.OK) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        User user = userResponse.getBody();
 
-    	ResponseEntity<User> userResponse = SessionUtils.getCurrentUser(request);
-    	if (userResponse.getStatusCode() != HttpStatus.OK) {
-    	    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    	}
-    	User user = userResponse.getBody();
-    	
-        List<UserCommentedPostResponse> userCommentedPosts = userService.getUserCommentedPosts(user.getId());
+        List<UserPostResponse> userCommentedPosts = userService.getUserCommentedPosts(user.getId());
         return ResponseEntity.ok(userCommentedPosts);
     }
 
