@@ -1,6 +1,7 @@
 package com.likelion12_team_project.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -36,7 +37,7 @@ public class JayuPost {
     private String imageUrl;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<JayuComment> comments;
+    private List<JayuComment> comments = new ArrayList<>();;
 
     private LocalDateTime createdAt;
 
