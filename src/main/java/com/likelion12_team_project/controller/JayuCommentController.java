@@ -22,7 +22,8 @@ public class JayuCommentController {
     private JayuCommentService jayuCommentService;
 
     @PostMapping("/{postId}")
-    public ResponseEntity<JayuCommentResponse> addComment(@PathVariable("postId") Long postId, @RequestBody JayuCommentRequest commentRequest, HttpServletRequest request) {
+    public ResponseEntity<JayuCommentResponse> addComment(@PathVariable("postId") Long postId, 
+    		@RequestBody JayuCommentRequest commentRequest, HttpServletRequest request) {
 
     	ResponseEntity<User> userResponse = SessionUtils.getCurrentUser(request);
     	if (userResponse.getStatusCode() != HttpStatus.OK) {
@@ -35,7 +36,9 @@ public class JayuCommentController {
     }
 
     @PutMapping("/{postId}/{commentId}")
-    public ResponseEntity<JayuCommentResponse> updateComment(@PathVariable("postId") Long postId, @PathVariable("commentId") Long commentId, @RequestBody JayuCommentRequest commentRequest, HttpServletRequest request) {
+    public ResponseEntity<JayuCommentResponse> updateComment(@PathVariable("postId") Long postId, 
+    		@PathVariable("commentId") Long commentId, @RequestBody JayuCommentRequest commentRequest, 
+    		HttpServletRequest request) {
 
     	ResponseEntity<User> userResponse = SessionUtils.getCurrentUser(request);
     	if (userResponse.getStatusCode() != HttpStatus.OK) {
@@ -48,7 +51,8 @@ public class JayuCommentController {
     }
 
     @DeleteMapping("/{postId}/{commentId}")
-    public ResponseEntity<Void> deleteComment(@PathVariable("postId") Long postId, @PathVariable("commentId") Long commentId, HttpServletRequest request) {
+    public ResponseEntity<Void> deleteComment(@PathVariable("postId") Long postId, @PathVariable("commentId") Long commentId, 
+    		HttpServletRequest request) {
 
     	ResponseEntity<User> userResponse = SessionUtils.getCurrentUser(request);
     	if (userResponse.getStatusCode() != HttpStatus.OK) {

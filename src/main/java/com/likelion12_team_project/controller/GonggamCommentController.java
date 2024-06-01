@@ -22,7 +22,8 @@ public class GonggamCommentController {
     private GonggamCommentService gonggamCommentService;
 
     @PostMapping("/{postId}")
-    public ResponseEntity<GonggamCommentResponse> addComment(@PathVariable("postId") Long postId, @RequestBody GonggamCommentRequest commentRequest, HttpServletRequest request) {
+    public ResponseEntity<GonggamCommentResponse> addComment(@PathVariable("postId") Long postId, 
+    		@RequestBody GonggamCommentRequest commentRequest, HttpServletRequest request) {
 
     	ResponseEntity<User> userResponse = SessionUtils.getCurrentUser(request);
     	if (userResponse.getStatusCode() != HttpStatus.OK) {
@@ -35,7 +36,9 @@ public class GonggamCommentController {
     }
 
     @PutMapping("/{postId}/{commentId}")
-    public ResponseEntity<GonggamCommentResponse> updateComment(@PathVariable("postId") Long postId, @PathVariable("commentId") Long commentId, @RequestBody GonggamCommentRequest commentRequest, HttpServletRequest request) {
+    public ResponseEntity<GonggamCommentResponse> updateComment(@PathVariable("postId") Long postId, 
+    		@PathVariable("commentId") Long commentId, @RequestBody GonggamCommentRequest commentRequest,
+    		HttpServletRequest request) {
 
     	ResponseEntity<User> userResponse = SessionUtils.getCurrentUser(request);
     	if (userResponse.getStatusCode() != HttpStatus.OK) {
@@ -48,7 +51,8 @@ public class GonggamCommentController {
     }
 
     @DeleteMapping("/{postId}/{commentId}")
-    public ResponseEntity<Void> deleteComment(@PathVariable("postId") Long postId, @PathVariable("commentId") Long commentId, HttpServletRequest request) {
+    public ResponseEntity<Void> deleteComment(@PathVariable("postId") Long postId, 
+    		@PathVariable("commentId") Long commentId, HttpServletRequest request) {
         
     	ResponseEntity<User> userResponse = SessionUtils.getCurrentUser(request);
     	if (userResponse.getStatusCode() != HttpStatus.OK) {
