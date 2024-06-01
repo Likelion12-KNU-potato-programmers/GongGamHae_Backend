@@ -77,23 +77,38 @@ public class GonggamPostService {
         return convertToDtoWithComments(savedPost);
     }
 
-    public GonggamPostResponse updatePost(Long postId, GonggamPostRequest postRequest, MultipartFile image) throws IOException {
-        GonggamPost post = gonggamPostRepository.findById(postId)
+    public GonggamPostResponse updatePost(Long postId, GonggamPostRequest postRequest, MultipartFile image, Long userId) throws IOException {
+    	GonggamPost post = gonggamPostRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid post ID"));
+        
+        if (!post.getUser().getId().equals(userId)) {
+            throw new IllegalArgumentException("Only the author can update this post.");
+        }
+
         post.setTitle(postRequest.getTitle());
         post.setContent(postRequest.getContent());
         if (image != null && !image.isEmpty()) {
+            // 이미지가 존재하면 업로드하고 이미지 URL 업데이트
             String imageUrl = uploadFile(image);
             post.setImageUrl(imageUrl);
+        } else {
+            // 이미지가 없는 경우 이미지 URL을 null로 설정
+            post.setImageUrl(null);
         }
+        
         post.updateCommentCount(); // 댓글 수 업데이트
         GonggamPost updatedPost = gonggamPostRepository.save(post);
         return convertToDtoWithComments(updatedPost);
     }
 
-    public void deletePost(Long postId) {
+    public void deletePost(Long postId, Long userId) {
         GonggamPost post = gonggamPostRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid post ID"));
+        
+        if (!post.getUser().getId().equals(userId)) {
+            throw new IllegalArgumentException("Only the author can update this post.");
+        }
+        
         gonggamPostRepository.delete(post);
     }
 

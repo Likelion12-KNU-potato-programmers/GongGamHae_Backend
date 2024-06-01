@@ -68,23 +68,38 @@ public class JayuPostService {
         return convertToDtoWithComments(savedPost);
     }
 
-    public JayuPostResponse updatePost(Long postId, JayuPostRequest postRequest, MultipartFile image) throws IOException {
+    public JayuPostResponse updatePost(Long postId, JayuPostRequest postRequest, MultipartFile image, Long userId) throws IOException {
         JayuPost post = jayuPostRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid post ID"));
+        
+        if (!post.getUser().getId().equals(userId)) {
+            throw new IllegalArgumentException("Only the author can update this post.");
+        }
+        
         post.setTitle(postRequest.getTitle());
         post.setContent(postRequest.getContent());
         if (image != null && !image.isEmpty()) {
+            // 이미지가 존재하면 업로드하고 이미지 URL 업데이트
             String imageUrl = uploadFile(image);
             post.setImageUrl(imageUrl);
+        } else {
+            // 이미지가 없는 경우 이미지 URL을 null로 설정
+            post.setImageUrl(null);
         }
+        
         post.updateCommentCount(); // 댓글 수 업데이트
         JayuPost updatedPost = jayuPostRepository.save(post);
         return convertToDtoWithComments(updatedPost);
     }
 
-    public void deletePost(Long postId) {
+    public void deletePost(Long postId, Long userId) {
         JayuPost post = jayuPostRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid post ID"));
+        
+        if (!post.getUser().getId().equals(userId)) {
+            throw new IllegalArgumentException("Only the author can update this post.");
+        }
+        
         jayuPostRepository.delete(post);
     }
 
