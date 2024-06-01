@@ -4,12 +4,12 @@ import com.likelion12_team_project.dto.request.UserNicknameUpdateRequest;
 import com.likelion12_team_project.dto.request.UserProfileUpdateRequest;
 import com.likelion12_team_project.dto.response.UserCommentedPostResponse;
 import com.likelion12_team_project.dto.response.UserPostResponse;
-import com.likelion12_team_project.dto.response.UserResponse;
+import com.likelion12_team_project.dto.response.UserInfoResponse;
 import com.likelion12_team_project.entity.User;
 import com.likelion12_team_project.service.UserService;
+import com.likelion12_team_project.util.SessionUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,42 +30,39 @@ public class UserController {
 
     @GetMapping("/me/posts")
     public ResponseEntity<List<UserPostResponse>> getCurrentUserPosts(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+
+    	ResponseEntity<User> userResponse = SessionUtils.getCurrentUser(request);
+    	if (userResponse.getStatusCode() != HttpStatus.OK) {
+    	    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    	}
+    	User user = userResponse.getBody();
+    	
         List<UserPostResponse> userPosts = userService.getUserPosts(user.getId());
         return ResponseEntity.ok(userPosts);
     }
 
     @GetMapping("/me/commented-posts")
     public ResponseEntity<List<UserCommentedPostResponse>> getCurrentUserCommentedPosts(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+
+    	ResponseEntity<User> userResponse = SessionUtils.getCurrentUser(request);
+    	if (userResponse.getStatusCode() != HttpStatus.OK) {
+    	    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    	}
+    	User user = userResponse.getBody();
+    	
         List<UserCommentedPostResponse> userCommentedPosts = userService.getUserCommentedPosts(user.getId());
         return ResponseEntity.ok(userCommentedPosts);
     }
 
     @PutMapping("/me/nickname")
     public ResponseEntity<String> updateNickname(HttpServletRequest request, @RequestBody UserNicknameUpdateRequest nicknameRequest) {
-        HttpSession session = request.getSession(false);
-        if (session == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+        
+    	ResponseEntity<User> userResponse = SessionUtils.getCurrentUser(request);
+    	if (userResponse.getStatusCode() != HttpStatus.OK) {
+    	    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    	}
+    	User user = userResponse.getBody();
+    	
         userService.updateNickname(user.getId(), nicknameRequest);
         return ResponseEntity.ok("Nickname updated successfully");
     }
@@ -73,14 +70,12 @@ public class UserController {
     @PutMapping("/me/profile")
     public ResponseEntity<String> updateProfile(HttpServletRequest request, 
                                                 @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
-        HttpSession session = request.getSession(false);
-        if (session == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+    	ResponseEntity<User> userResponse = SessionUtils.getCurrentUser(request);
+    	if (userResponse.getStatusCode() != HttpStatus.OK) {
+    	    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    	}
+    	User user = userResponse.getBody();
+    	
         try {
             UserProfileUpdateRequest profileUpdateRequest = new UserProfileUpdateRequest();
             profileUpdateRequest.setProfileImage(profileImage);
@@ -92,16 +87,15 @@ public class UserController {
     }
     
     @GetMapping("/me")
-    public ResponseEntity<UserResponse> getCurrentUserInfo(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        UserResponse userResponse = userService.getUserInfo(user.getId());
-        return ResponseEntity.ok(userResponse);
+    public ResponseEntity<UserInfoResponse> getCurrentUserInfo(HttpServletRequest request) {
+
+    	ResponseEntity<User> userResponse = SessionUtils.getCurrentUser(request);
+    	if (userResponse.getStatusCode() != HttpStatus.OK) {
+    	    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    	}
+    	User user = userResponse.getBody();
+    	
+        UserInfoResponse userInfoResponse = userService.getUserInfo(user.getId());
+        return ResponseEntity.ok(userInfoResponse);
     }
 }

@@ -8,10 +8,10 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class UserResponse {
+public class UserInfoResponse {
 	
     private Long id;
-    private String userid;
+    private String userAccount;
     private String nickname;
     private String profileImage;
 }

@@ -5,7 +5,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.likelion12_team_project.dto.request.JayuPostRequest;
 import com.likelion12_team_project.dto.response.JayuCommentResponse;
 import com.likelion12_team_project.dto.response.JayuPostResponse;
-import com.likelion12_team_project.dto.response.UserResponse;
+import com.likelion12_team_project.dto.response.UserInfoResponse;
 import com.likelion12_team_project.entity.JayuComment;
 import com.likelion12_team_project.entity.JayuPost;
 import com.likelion12_team_project.entity.User;
@@ -52,8 +52,8 @@ public class JayuPostService {
         return jayuPostRepository.findById(id).map(this::convertToDtoWithComments);
     }
 
-    public JayuPostResponse createPost(JayuPostRequest postRequest, MultipartFile image) throws IOException {
-        User user = userRepository.findById(1L)
+    public JayuPostResponse createPost(JayuPostRequest postRequest, MultipartFile image, Long userId) throws IOException {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
         JayuPost post = new JayuPost();
         post.setUser(user);
@@ -88,13 +88,11 @@ public class JayuPostService {
         jayuPostRepository.delete(post);
     }
 
-    public List<JayuPostResponse> getPostsByUser(Long userId) {
-        return jayuPostRepository.findByUserId(userId).stream().map(this::convertToDtoWithComments).collect(Collectors.toList());
-    }
+    
 
     private JayuPostResponse convertToDtoWithComments(JayuPost post) {
         User user = post.getUser();
-        UserResponse userResponse = new UserResponse(user.getId(), user.getUserid(), user.getNickname(), user.getProfileImageUrl());
+        UserInfoResponse userResponse = new UserInfoResponse(user.getId(), user.getUserAccount(), user.getNickname(), user.getProfileImageUrl());
         List<JayuComment> comments = jayuCommentRepository.findByPostId(post.getId());
         List<JayuCommentResponse> commentResponses = comments.stream()
                 .map(this::convertCommentToDto)
@@ -114,7 +112,7 @@ public class JayuPostService {
 
     private JayuCommentResponse convertCommentToDto(JayuComment comment) {
         User user = comment.getUser();
-        UserResponse userResponse = new UserResponse(user.getId(), user.getUserid(), user.getNickname(), user.getProfileImageUrl());
+        UserInfoResponse userResponse = new UserInfoResponse(user.getId(), user.getUserAccount(), user.getNickname(), user.getProfileImageUrl());
         return new JayuCommentResponse(comment.getId(), comment.getContent(), comment.getCreatedAt(), userResponse);
     }
 
