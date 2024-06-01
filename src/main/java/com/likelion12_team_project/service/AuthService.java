@@ -30,16 +30,20 @@ public class AuthService {
     private String region;
 
     public void register(RegisterRequest request) throws IOException {
-        if (userRepository.findByUserid(request.getUserid()) != null) {
-            throw new RuntimeException("Username already exists");
+        if (userRepository.findByUserAccount(request.getUserAccount()) != null) {
+            throw new RuntimeException("ID already exists");
         }
 
         if (!request.getPassword().equals(request.getConfirmPassword())) {
             throw new RuntimeException("Passwords do not match");
         }
+        
+        if (userRepository.findByNickname(request.getNickname()) != null) {
+            throw new RuntimeException("Nickname already exists");
+        }
 
         User user = new User();
-        user.setUserid(request.getUserid());
+        user.setUserAccount(request.getUserAccount());
         user.setPassword(request.getPassword());
         user.setNickname(request.getNickname());
         user.setProfileImageUrl("https://likelion12-team-project-bucket.s3.ap-northeast-2.amazonaws.com/default_profile.png");
@@ -53,7 +57,7 @@ public class AuthService {
     }
 
     public User login(LoginRequest request) {
-        User user = userRepository.findByUserid(request.getUserid());
+        User user = userRepository.findByUserAccount(request.getUserAccount());
         if (user != null && user.getPassword().equals(request.getPassword())) {
             return user;
         } else {

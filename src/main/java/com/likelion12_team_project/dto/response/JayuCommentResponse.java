@@ -12,8 +12,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class JayuCommentResponse {
+	
     private Long id;
     private String content;
     private LocalDateTime createdAt;
-    private UserResponse user;
+    private UserInfoResponse user;
 }

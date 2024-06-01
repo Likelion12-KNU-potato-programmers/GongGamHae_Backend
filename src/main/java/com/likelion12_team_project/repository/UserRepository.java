@@ -7,5 +7,6 @@ import com.likelion12_team_project.entity.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long>{
-	User findByUserid(String userid);
+	User findByUserAccount(String userAccount);
+	User findByNickname(String nickname);
 }
