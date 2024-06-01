@@ -62,19 +62,37 @@ public class GonggamPostController {
     public ResponseEntity<GonggamPostResponse> updatePost(
             @PathVariable("postId") Long postId,
             @RequestPart(name = "post", required = true) GonggamPostRequest postRequest,
-            @RequestPart(name = "imageFile", required = false) MultipartFile file) throws IOException {
-        GonggamPostResponse updatedPost = gonggamPostService.updatePost(postId, postRequest, file);
+            @RequestPart(name = "imageFile", required = false) MultipartFile file,
+            HttpServletRequest request) throws IOException {
+        
+        ResponseEntity<User> userResponse = SessionUtils.getCurrentUser(request);
+    	if (userResponse.getStatusCode() != HttpStatus.OK) {
+    	    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    	}
+    	User user = userResponse.getBody();
+    	
+    	GonggamPostResponse updatedPost = gonggamPostService.updatePost(postId, postRequest, file, user.getId());
+        
         return ResponseEntity.ok(updatedPost);
     }
 
     @DeleteMapping("/{postId}")
-    public ResponseEntity<Void> deletePost(@PathVariable("postId") Long postId) {
-        gonggamPostService.deletePost(postId);
+    public ResponseEntity<Void> deletePost(@PathVariable("postId") Long postId, 
+    		HttpServletRequest request) {
+    	
+    	ResponseEntity<User> userResponse = SessionUtils.getCurrentUser(request);
+    	if (userResponse.getStatusCode() != HttpStatus.OK) {
+    	    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    	}
+    	User user = userResponse.getBody();
+    	
+        gonggamPostService.deletePost(postId, user.getId());
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{postId}/like")
     public ResponseEntity<Void> likePost(@PathVariable("postId") Long postId, HttpServletRequest request) {
+    	
     	ResponseEntity<User> userResponse = SessionUtils.getCurrentUser(request);
     	if (userResponse.getStatusCode() != HttpStatus.OK) {
     	    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -87,6 +105,7 @@ public class GonggamPostController {
 
     @PutMapping("/{postId}/dislike")
     public ResponseEntity<Void> dislikePost(@PathVariable("postId") Long postId, HttpServletRequest request) {
+    	
     	ResponseEntity<User> userResponse = SessionUtils.getCurrentUser(request);
     	if (userResponse.getStatusCode() != HttpStatus.OK) {
     	    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

@@ -57,14 +57,30 @@ public class JayuPostController {
     public ResponseEntity<JayuPostResponse> updatePost(
             @PathVariable("postId") Long postId,
             @RequestPart(name = "post", required = true) JayuPostRequest postRequest,
-            @RequestPart(name = "imageFile", required = false) MultipartFile file) throws IOException {
-        JayuPostResponse updatedPost = jayuPostService.updatePost(postId, postRequest, file);
+            @RequestPart(name = "imageFile", required = false) MultipartFile file,
+            HttpServletRequest request) throws IOException {
+    	
+    	ResponseEntity<User> userResponse = SessionUtils.getCurrentUser(request);
+    	if (userResponse.getStatusCode() != HttpStatus.OK) {
+    	    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    	}
+    	User user = userResponse.getBody();
+    	
+        JayuPostResponse updatedPost = jayuPostService.updatePost(postId, postRequest, file, user.getId());
         return ResponseEntity.ok(updatedPost);
     }
 
     @DeleteMapping("/{postId}")
-    public ResponseEntity<Void> deletePost(@PathVariable("postId") Long postId) {
-        jayuPostService.deletePost(postId);
+    public ResponseEntity<Void> deletePost(@PathVariable("postId") Long postId,
+    		HttpServletRequest request) {
+    	
+    	ResponseEntity<User> userResponse = SessionUtils.getCurrentUser(request);
+    	if (userResponse.getStatusCode() != HttpStatus.OK) {
+    	    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    	}
+    	User user = userResponse.getBody();
+    	
+        jayuPostService.deletePost(postId, user.getId());
         return ResponseEntity.noContent().build();
     }
 }
