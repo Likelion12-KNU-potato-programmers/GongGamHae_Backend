@@ -12,7 +12,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class GonggamPostResponse {
+public class GonggamPostResponse implements UserPostResponse{
 
     private Long id;
     private String title;
@@ -24,4 +24,9 @@ public class GonggamPostResponse {
     private List<GonggamCommentResponse> comments;
     private int likes;  // 좋아요 수
     private int dislikes;  // 싫어요 수
+    
+    @Override
+    public Long getId() {
+        return id;
+    }
 }

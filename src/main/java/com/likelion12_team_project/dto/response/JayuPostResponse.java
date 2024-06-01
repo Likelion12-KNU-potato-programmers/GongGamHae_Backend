@@ -12,9 +12,9 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class JayuPostResponse {
+public class JayuPostResponse implements UserPostResponse{
 
-    private Long id;
+	private Long id;
     private String title;
     private String content;
     private String imageUrl;
@@ -22,4 +22,9 @@ public class JayuPostResponse {
     private UserInfoResponse userInfo;
     private int commentCount;
     private List<JayuCommentResponse> comments; // 댓글 목록 추가
+    
+    @Override
+    public Long getId() {
+        return id;
+    }
 }
