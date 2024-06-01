@@ -16,5 +16,5 @@ public class GonggamCommentResponse {
     private Long id;
     private String content;
     private LocalDateTime createdAt;
-    private UserInfoResponse user;
+    private UserResponse user;
 }

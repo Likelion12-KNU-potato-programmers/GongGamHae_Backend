@@ -2,12 +2,7 @@ package com.likelion12_team_project.controller;
 
 import com.likelion12_team_project.dto.request.JayuPostRequest;
 import com.likelion12_team_project.dto.response.JayuPostResponse;
-import com.likelion12_team_project.entity.User;
 import com.likelion12_team_project.service.JayuPostService;
-import com.likelion12_team_project.util.SessionUtils;
-
-import jakarta.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,16 +35,8 @@ public class JayuPostController {
     @PostMapping
     public ResponseEntity<JayuPostResponse> createPost(
             @RequestPart(name = "post", required = true) JayuPostRequest postRequest,
-            @RequestPart(name = "imageFile", required = false) MultipartFile file, 
-            HttpServletRequest request) throws IOException {
-    	
-    	ResponseEntity<User> userResponse = SessionUtils.getCurrentUser(request);
-    	if (userResponse.getStatusCode() != HttpStatus.OK) {
-    	    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    	}
-    	User user = userResponse.getBody();
-    	
-        JayuPostResponse createdPost = jayuPostService.createPost(postRequest, file, user.getId());
+            @RequestPart(name = "imageFile", required = false) MultipartFile file) throws IOException {
+        JayuPostResponse createdPost = jayuPostService.createPost(postRequest, file);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdPost);
     }
 
@@ -66,5 +53,10 @@ public class JayuPostController {
     public ResponseEntity<Void> deletePost(@PathVariable("postId") Long postId) {
         jayuPostService.deletePost(postId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/user/{userId}")
+    public List<JayuPostResponse> getPostsByUser(@PathVariable Long userId) {
+        return jayuPostService.getPostsByUser(userId);
     }
 }

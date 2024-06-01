@@ -19,7 +19,7 @@ public class GonggamPostResponse {
     private String content;
     private String imageUrl;
     private LocalDateTime createdAt;
-    private UserInfoResponse userInfo;
+    private UserResponse userInfo;
     private int commentCount;
     private List<GonggamCommentResponse> comments;
     private int likes;  // 좋아요 수

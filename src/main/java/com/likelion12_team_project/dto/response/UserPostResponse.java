@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserPostResponse {
-	
     private Long id;
     private String title;
     private String content;

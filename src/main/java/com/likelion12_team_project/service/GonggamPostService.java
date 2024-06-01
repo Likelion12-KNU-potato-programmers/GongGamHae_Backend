@@ -5,7 +5,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.likelion12_team_project.dto.request.GonggamPostRequest;
 import com.likelion12_team_project.dto.response.GonggamCommentResponse;
 import com.likelion12_team_project.dto.response.GonggamPostResponse;
-import com.likelion12_team_project.dto.response.UserInfoResponse;
+import com.likelion12_team_project.dto.response.UserResponse;
 import com.likelion12_team_project.entity.GonggamComment;
 import com.likelion12_team_project.entity.GonggamPost;
 import com.likelion12_team_project.entity.GonggamPostLike;
@@ -61,8 +61,8 @@ public class GonggamPostService {
         return gonggamPostRepository.findByLikesGreaterThan(10).stream().map(this::convertToDtoWithComments).collect(Collectors.toList());
     }
 
-    public GonggamPostResponse createPost(GonggamPostRequest postRequest, MultipartFile image, Long userid) throws IOException {
-        User user = userRepository.findById(userid)
+    public GonggamPostResponse createPost(GonggamPostRequest postRequest, MultipartFile image) throws IOException {
+        User user = userRepository.findById(1L)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
         GonggamPost post = new GonggamPost();
         post.setUser(user);
@@ -151,7 +151,7 @@ public class GonggamPostService {
 
     private GonggamPostResponse convertToDtoWithComments(GonggamPost post) {
         User user = post.getUser();
-        UserInfoResponse userResponse = new UserInfoResponse(user.getId(), user.getUserAccount(), user.getNickname(), user.getProfileImageUrl());
+        UserResponse userResponse = new UserResponse(user.getId(), user.getUserid(), user.getNickname(), user.getProfileImageUrl());
         List<GonggamComment> comments = gonggamCommentRepository.findByPostId(post.getId());
         List<GonggamCommentResponse> commentResponses = comments.stream()
                 .map(this::convertCommentToDto)
@@ -173,7 +173,7 @@ public class GonggamPostService {
 
     private GonggamCommentResponse convertCommentToDto(GonggamComment comment) {
         User user = comment.getUser();
-        UserInfoResponse userResponse = new UserInfoResponse(user.getId(), user.getUserAccount(), user.getNickname(), user.getProfileImageUrl());
+        UserResponse userResponse = new UserResponse(user.getId(), user.getUserid(), user.getNickname(), user.getProfileImageUrl());
         return new GonggamCommentResponse(comment.getId(), comment.getContent(), comment.getCreatedAt(), userResponse);
     }
 
