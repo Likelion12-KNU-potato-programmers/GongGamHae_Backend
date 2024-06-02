@@ -2,6 +2,7 @@ package com.likelion12_team_project.controller;
 
 import com.likelion12_team_project.dto.request.GonggamPostRequest;
 import com.likelion12_team_project.dto.response.GonggamPostResponse;
+import com.likelion12_team_project.dto.response.SidePostResponse;
 import com.likelion12_team_project.entity.User;
 import com.likelion12_team_project.service.GonggamPostService;
 import com.likelion12_team_project.util.SessionUtils;
@@ -40,6 +41,11 @@ public class GonggamPostController {
     @GetMapping("/best")
     public List<GonggamPostResponse> getBestPosts() {
         return gonggamPostService.getBestPosts();
+    }
+    
+    @GetMapping("/sideposts")
+    public List<SidePostResponse> getSidePosts() {
+        return gonggamPostService.getSidePosts();
     }
 
     @PostMapping
