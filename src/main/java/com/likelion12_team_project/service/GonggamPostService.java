@@ -5,6 +5,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.likelion12_team_project.dto.request.GonggamPostRequest;
 import com.likelion12_team_project.dto.response.GonggamCommentResponse;
 import com.likelion12_team_project.dto.response.GonggamPostResponse;
+import com.likelion12_team_project.dto.response.SidePostResponse;
 import com.likelion12_team_project.dto.response.UserInfoResponse;
 import com.likelion12_team_project.entity.GonggamComment;
 import com.likelion12_team_project.entity.GonggamPost;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -55,6 +57,37 @@ public class GonggamPostService {
 
     public Optional<GonggamPostResponse> getPostById(Long id) {
         return gonggamPostRepository.findById(id).map(this::convertToDtoWithComments);
+    }
+    
+    public List<GonggamPostResponse> getRecentPosts() {
+        List<GonggamPost> posts = gonggamPostRepository.findTop3ByOrderByCreatedAtDesc();
+        return posts.stream()
+                .limit(3) // 최근 3개만 가져오기
+                .map(this::convertToDtoWithComments)
+                .collect(Collectors.toList());
+    }
+    
+    public List<GonggamPostResponse> getRecentBestPosts() {
+        List<GonggamPostResponse> bestPosts = getBestPosts();
+        bestPosts.sort(Comparator.comparing(GonggamPostResponse::getCreatedAt).reversed()); // createdAt을 기준으로 역순으로 정렬
+        int size = Math.min(bestPosts.size(), 3); // 최대 3개까지만 가져오도록 크기 제한 설정
+        return bestPosts.stream()
+                .limit(size) // 최대 3개만 가져오기
+                .collect(Collectors.toList());
+    }
+    
+    // 최근 작성된 GonggamPost 3개와 좋아요가 많은 BestPost 3개를 모두 가져오기
+    public List<SidePostResponse> getSidePosts() {
+        List<GonggamPostResponse> recentPosts = getRecentPosts();
+        List<GonggamPostResponse> recentBestPosts = getRecentBestPosts();
+        
+        // 최근 게시물 3개만 추출
+        recentPosts = recentPosts.stream().limit(3).collect(Collectors.toList());
+        
+        return List.of(
+            new SidePostResponse("recentPosts", recentPosts),
+            new SidePostResponse("bestPosts", recentBestPosts)
+        );
     }
 
     public List<GonggamPostResponse> getBestPosts() {
